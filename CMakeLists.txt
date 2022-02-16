@@ -48,15 +48,15 @@ ecbuild_bundle( PROJECT crtm GIT "https://github.com/jcsda-internal/crtm.git" BR
 # ----------------------
 ecbuild_bundle( PROJECT oops  GIT "https://github.com/jcsda-internal/oops.git"  BRANCH develop UPDATE )
 ecbuild_bundle( PROJECT saber GIT "https://github.com/jcsda-internal/saber.git" BRANCH develop UPDATE )
-ecbuild_bundle( PROJECT ioda  GIT "https://github.com/jcsda-internal/ioda.git"  BRANCH develop UPDATE )
+ecbuild_bundle( PROJECT ioda  GIT "https://github.com/jcsda-internal/ioda.git"  BRANCH feature/ufs UPDATE )
 ecbuild_bundle( PROJECT ufo   GIT "https://github.com/jcsda-internal/ufo.git"   BRANCH develop UPDATE )
 
 # Options for building with certain models
 # ----------------------------------------
 set(UFS_APP "ATM" CACHE STRING "Choose the UFS Application")
 set_property(CACHE UFS_APP PROPERTY STRINGS "ATM" "NG-GODAS" "S2S")
-if(NOT UFS_APP MATCHES "^(ATM|NG-GODAS|S2S)$")
-  ecbuild_error("Valid options for -DUFS_APP are ATM|NG-GODAS|S2S")
+if(NOT UFS_APP MATCHES "^(ATM)$")
+  ecbuild_error("Only -DUFS_APP=ATM is currently supported")
 endif()
 ecbuild_info("Building with UFS application: ${UFS_APP}")
 
@@ -87,7 +87,7 @@ ExternalProject_Add(FMS
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/fms
   GIT_REPOSITORY https://github.com/jcsda/FMS.git
   GIT_SUBMODULES_RECURSE TRUE
-  GIT_TAG dev/jcsda
+  GIT_TAG jcsda/dev
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fms
   INSTALL_DIR ${DEPEND_LIB_ROOT}
   CMAKE_ARGS -DGFS_PHYS=ON -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_Fortran_FLAGS="-fPIC" -D64BIT=ON -DOPENMP=ON -DCMAKE_INSTALL_PREFIX=${DEPEND_LIB_ROOT}
@@ -111,20 +111,8 @@ set_target_properties(stochastic_physics PROPERTIES IMPORTED_LOCATION ${DEPEND_L
 set_target_properties(fv3atm PROPERTIES IMPORTED_LOCATION ${DEPEND_LIB_ROOT}/lib/libfv3atm.a)
 set_target_properties(ccppphys PROPERTIES IMPORTED_LOCATION ${DEPEND_LIB_ROOT}/lib/libccpp_physics.a)
 
-if(UFS_APP MATCHES "^(S2S)$")
-  # fv3-jedi and associated repositories
-  # ------------------------------------
-  ecbuild_bundle( PROJECT femps    GIT "https://github.com/jcsda-internal/femps.git"    BRANCH develop UPDATE )
-  ecbuild_bundle( PROJECT fv3-jedi GIT "https://github.com/jcsda-internal/fv3-jedi.git" BRANCH feature/ufs UPDATE )
-  ecbuild_bundle( PROJECT gsw GIT "https://github.com/jcsda-internal/GSW-Fortran.git"     BRANCH develop UPDATE )
-  ecbuild_bundle( PROJECT soca     GIT "https://github.com/jcsda-internal/soca.git"     BRANCH develop UPDATE )
-elseif(UFS_APP MATCHES "^(NG-GODAS)$")
-  ecbuild_bundle( PROJECT gsw GIT "https://github.com/jcsda-internal/GSW-Fortran.git"     BRANCH develop UPDATE )
-  ecbuild_bundle( PROJECT soca     GIT "https://github.com/jcsda-internal/soca.git" BRANCH develop UPDATE )
-elseif(UFS_APP MATCHES "^(ATM)$")
-  ecbuild_bundle( PROJECT femps    GIT "https://github.com/jcsda-internal/femps.git"    BRANCH develop UPDATE )
-  ecbuild_bundle( PROJECT fv3-jedi GIT "https://github.com/jcsda-internal/fv3-jedi.git" BRANCH feature/ufs UPDATE )
-endif()
+ecbuild_bundle( PROJECT femps    GIT "https://github.com/jcsda-internal/femps.git"    BRANCH develop UPDATE )
+ecbuild_bundle( PROJECT fv3-jedi GIT "https://github.com/jcsda-internal/fv3-jedi.git" BRANCH feature/ufs UPDATE )
 
 
 # ioda, ufo, fv3-jedi and saber test data
@@ -165,7 +153,7 @@ endif()
 
 # If fv3-jedi's current branch is available in fv3-jedi-data repo, that branch will be checked out
 branch_checkout (REPO_DIR_NAME fv3-jedi-data
-                 BRANCH ${GIT_BRANCH_FUNC} )
+                 BRANCH feature/ufs )
 
 # same procedure for saber-data
 find_branch_name(REPO_DIR_NAME saber)
